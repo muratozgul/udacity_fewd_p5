@@ -4,13 +4,30 @@ var app = {
 
 app.Place = function(name, lat, lng) {
   var self = this;
+
   self.name = name;
-  self.location = {
+  self.position = {
     lat: lat,
     lng: lng 
   };
   self.isVisible = true;
   self.isHighlighted = false;
+
+  var map = app.mapView.getMap();
+
+  self.marker = new google.maps.Marker({
+    map: map,
+    position: self.position,
+    title: self.name
+  });
+
+  self.addMarker = function(){
+    self.marker.setMap(map);
+  }
+
+  self.removeMarker = function(){
+    self.marker.setMap(null);
+  }
 }
 
 app.PlacesViewModel = function() {
@@ -37,7 +54,40 @@ app.PlacesViewModel = function() {
   });
 }
 
-ko.applyBindings(new app.PlacesViewModel());
+ko.bindingHandlers.placeItem = {
+  init: function(element, valueAccessor) {
+    $(element).addClass("placeItem");
+    
+    $(element).hover(
+      function() { 
+        console.log("Hover");
+        console.dir(this);
+      }, 
+      function() { 
+        console.log("Hover end");
+        console.dir(this);
+      }
+    ).click(function() { 
+      console.log("Clicked");
+      console.dir(this);
+    });
+  },
+  update: function(element, valueAccessor) {
+    // Give the first x stars the "chosen" class, where x <= rating
+    var observable = valueAccessor();
+    $("span", element).each(function(index) {
+      $(this).toggleClass("chosen", index < observable());
+    });
+  }
+};
+
+function initMap(){
+  app.mapView = getMapView();
+  app.mapView.initMap();
+  ko.applyBindings(new app.PlacesViewModel());
+}
+
+
 
 
 
