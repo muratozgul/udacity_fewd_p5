@@ -70,6 +70,9 @@ app.PlacesViewModel = function() {
 
   self.filteredPlaces = ko.computed(function() {
     if(!self.currentFilter()) {
+      ko.utils.arrayForEach(self.places(), function(place) {
+        place.isVisible(true);
+      });
       return self.places(); 
     } else {
       var filter = self.currentFilter();
@@ -80,6 +83,10 @@ app.PlacesViewModel = function() {
         return isMatch;
       });
     }
+  });
+
+  self.currentFilter.subscribe(function (newText) {
+    console.log("Filter:", newText);
   });
 
   // Dummy init for test

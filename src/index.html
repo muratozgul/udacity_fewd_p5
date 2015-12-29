@@ -18,14 +18,14 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#" data-bind="click: function() { currentFilter('CMU') }">Neighborhood</a>
+        <a class="navbar-brand" href="#">Neighborhood</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <form class="navbar-form navbar-left" role="search">
           <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search">
+            <input type="text" class="form-control" placeholder="Search" data-bind="value: currentFilter, valueUpdate: 'afterkeyup'">
           </div>
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
