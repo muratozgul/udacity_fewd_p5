@@ -48,6 +48,20 @@ app.PlacesViewModel = function() {
     self.seats.remove(seat) 
   };
 
+  self.currentFilter = ko.observable();
+
+  self.filteredPlaces = ko.computed(function() {
+    if(!self.currentFilter()) {
+      return self.places(); 
+    } else {
+      var filter = self.currentFilter();
+      var regex = new RegExp(filter);
+      return ko.utils.arrayFilter(self.places(), function(place) {
+        return regex.test(place.name);
+      });
+    }
+  });
+
   // Dummy init for test
   self.defaultData.forEach(function(data, index, array){
     self.addPlace(new app.Place(data.name, data.lat, data.lng));  

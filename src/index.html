@@ -18,7 +18,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">Neighborhood</a>
+        <a class="navbar-brand" href="#" data-bind="click: function() { currentFilter('CMU') }">Neighborhood</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
@@ -38,10 +38,10 @@
       <div class="col-md-4">
         <h3>Places</h3>
         <ul class="list-group">
-          <!-- ko if: places().length === 0 -->
+          <!-- ko if: filteredPlaces().length === 0 -->
           <li class="list-group-item">No places to display</li>
           <!-- /ko -->
-          <!-- ko foreach : places -->
+          <!-- ko foreach : filteredPlaces -->
           <li class="list-group-item" data-bind="text: name"></li>
           <!-- /ko -->
         </ul>
