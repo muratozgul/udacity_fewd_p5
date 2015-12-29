@@ -10,8 +10,8 @@ app.Place = function(name, lat, lng) {
     lat: lat,
     lng: lng 
   };
-  self.isVisible = true;
-  self.isHighlighted = false;
+  self.isVisible = ko.observable(false);
+  self.isHighlighted = ko.observable(false);
 
   var map = app.mapView.getMap();
 
@@ -28,6 +28,24 @@ app.Place = function(name, lat, lng) {
   self.removeMarker = function(){
     self.marker.setMap(null);
   }
+
+  self.showMarker = function(){
+    self.marker.setVisible(true);
+  }
+
+  self.hideMarker = function(){
+    self.marker.setVisible(false);
+  }
+
+  self.isVisible.subscribe(function(currentState) {
+    if (currentState) {
+      self.showMarker();
+    } else {
+      self.hideMarker();
+    }
+  });
+
+  self.isVisible(true);
 }
 
 app.PlacesViewModel = function() {
@@ -57,7 +75,9 @@ app.PlacesViewModel = function() {
       var filter = self.currentFilter();
       var regex = new RegExp(filter);
       return ko.utils.arrayFilter(self.places(), function(place) {
-        return regex.test(place.name);
+        var isMatch = regex.test(place.name);
+        place.isVisible(isMatch);
+        return isMatch;
       });
     }
   });
