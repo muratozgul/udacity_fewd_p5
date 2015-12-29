@@ -24,10 +24,10 @@
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <form class="navbar-form navbar-left" role="search">
-          <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search" data-bind="value: currentFilter, valueUpdate: 'afterkeyup'">
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Search</span>
+            <input type="text" class="form-control" placeholder="Search" data-bind="value: currentFilter, valueUpdate: 'afterkeyup'" aria-describedby="basic-addon1" >
           </div>
-          <button type="submit" class="btn btn-default">Submit</button>
         </form>
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
@@ -35,18 +35,19 @@
 
   <main class="container">
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-sm-4">
         <h3>Places</h3>
         <ul class="list-group">
           <!-- ko if: filteredPlaces().length === 0 -->
           <li class="list-group-item">No places to display</li>
           <!-- /ko -->
           <!-- ko foreach : filteredPlaces -->
-          <li class="list-group-item" data-bind="text: name"></li>
+          <li class="list-group-item placeItem" 
+          data-bind="text: name, event: { mouseover: mouseOver, mouseout: mouseOut }, click: mouseClick, el: el, $el: $el"></li>
           <!-- /ko -->
         </ul>
       </div>
-      <div class="col-md-8" id="mapDiv">
+      <div class="col-sm-8" id="mapDiv">
         <div id="map"></div>
       </div>
     </div>

@@ -2,8 +2,10 @@ var app = {
   mapView: {}
 };
 
-app.Place = function(name, lat, lng) {
+app.Place = function(name, lat, lng, parent) {
   var self = this;
+
+  self.parent = ko.observable(parent);
 
   self.name = name;
   self.position = {
@@ -12,6 +14,11 @@ app.Place = function(name, lat, lng) {
   };
   self.isVisible = ko.observable(false);
   self.isHighlighted = ko.observable(false);
+  self.isSelected = ko.observable(false);
+
+  self.el = ko.observable();
+
+  self.$el = ko.observable();
 
   var map = app.mapView.getMap();
 
@@ -37,6 +44,10 @@ app.Place = function(name, lat, lng) {
     self.marker.setVisible(false);
   }
 
+  self.centerOnMap = function(){
+    map.setCenter(self.marker.getPosition());
+  }
+
   self.isVisible.subscribe(function(currentState) {
     if (currentState) {
       self.showMarker();
@@ -45,7 +56,55 @@ app.Place = function(name, lat, lng) {
     }
   });
 
+  self.markerIcons = {
+    RED: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+    YELLOW: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+    GREEN: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+  };
+
+  self.isHighlighted.subscribe(function(currentState) {
+    if (self.isSelected()) {
+      self.marker.setIcon(self.markerIcons.GREEN);
+    } else if (currentState) {
+      self.marker.setIcon(self.markerIcons.YELLOW);
+    } else {
+      self.marker.setIcon(self.markerIcons.RED);
+    }
+  });
+
+  self.isSelected.subscribe(function(currentState) {
+    if (currentState) {
+      self.$el().addClass("selected");
+      self.marker.setIcon(self.markerIcons.GREEN);
+    } else {
+      self.$el().removeClass("selected");
+      if(self.isHighlighted()) {
+        self.marker.setIcon(self.markerIcons.YELLOW);
+      } else {
+        self.marker.setIcon(self.markerIcons.RED);
+      }
+    }
+  });
+
+  self.mouseOver = function(){
+    self.isHighlighted(true);
+  }
+
+  self.mouseOut = function(){
+    self.isHighlighted(false);
+  }
+
+  self.mouseClick = function(){
+    self.parent().clearSelection();
+    self.isSelected(true);
+  }
+
+  self.marker.addListener('click', function() {
+    self.mouseClick();
+  });
+
   self.isVisible(true);
+  self.isHighlighted(false);
 }
 
 app.PlacesViewModel = function() {
@@ -85,49 +144,42 @@ app.PlacesViewModel = function() {
     }
   });
 
-  self.currentFilter.subscribe(function (newText) {
-    console.log("Filter:", newText);
-  });
+  self.clearSelection= function() {
+    ko.utils.arrayForEach(self.places(), function(place) {
+      place.isSelected(false);
+    });
+  }
 
   // Dummy init for test
   self.defaultData.forEach(function(data, index, array){
-    self.addPlace(new app.Place(data.name, data.lat, data.lng));  
+    self.addPlace(new app.Place(data.name, data.lat, data.lng, self));
   });
 }
 
-ko.bindingHandlers.placeItem = {
-  init: function(element, valueAccessor) {
-    $(element).addClass("placeItem");
-    
-    $(element).hover(
-      function() { 
-        console.log("Hover");
-        console.dir(this);
-      }, 
-      function() { 
-        console.log("Hover end");
-        console.dir(this);
-      }
-    ).click(function() { 
-      console.log("Clicked");
-      console.dir(this);
-    });
-  },
-  update: function(element, valueAccessor) {
-    // Give the first x stars the "chosen" class, where x <= rating
-    var observable = valueAccessor();
-    $("span", element).each(function(index) {
-      $(this).toggleClass("chosen", index < observable());
-    });
+ko.bindingHandlers.el = {
+  init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+    // This will be called when the binding is first applied to an element
+    // Set up any initial state, event handlers, etc. here
+    var value = valueAccessor();
+    value(element);
   }
 };
+
+ko.bindingHandlers.$el = {
+  init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+    // This will be called when the binding is first applied to an element
+    // Set up any initial state, event handlers, etc. here
+    var value = valueAccessor();
+    value($(element).first());
+  }
+};
+
 
 function initMap(){
   app.mapView = getMapView();
   app.mapView.initMap();
   ko.applyBindings(new app.PlacesViewModel());
 }
-
 
 
 

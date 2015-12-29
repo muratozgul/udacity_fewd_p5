@@ -7,3 +7,15 @@
 #mapDiv {
   height: 450px;
 }
+
+.placeItem:hover {
+  background-color: yellow;
+}
+
+.selected {
+  background-color: #5c5;
+}
+
+.selected:hover {
+  background-color: #5f5;
+}
