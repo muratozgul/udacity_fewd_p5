@@ -22,10 +22,18 @@ app.Place = function(name, lat, lng, parent) {
 
   var map = app.mapView.getMap();
 
+  self.markerIcons = {
+    RED: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+    YELLOW: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+    GREEN: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+  };
+
   self.marker = new google.maps.Marker({
     map: map,
     position: self.position,
-    title: self.name
+    title: self.name,
+    icon: self.markerIcons.RED,
+    animation: null
   });
 
   self.addMarker = function(){
@@ -56,12 +64,6 @@ app.Place = function(name, lat, lng, parent) {
     }
   });
 
-  self.markerIcons = {
-    RED: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-    YELLOW: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-    GREEN: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-  };
-
   self.isHighlighted.subscribe(function(currentState) {
     if (self.isSelected()) {
       self.marker.setIcon(self.markerIcons.GREEN);
@@ -76,8 +78,10 @@ app.Place = function(name, lat, lng, parent) {
     if (currentState) {
       self.$el().addClass("selected");
       self.marker.setIcon(self.markerIcons.GREEN);
+      self.infoWindow.open(map, self.marker);
     } else {
       self.$el().removeClass("selected");
+      self.infoWindow.close();
       if(self.isHighlighted()) {
         self.marker.setIcon(self.markerIcons.YELLOW);
       } else {
@@ -97,6 +101,21 @@ app.Place = function(name, lat, lng, parent) {
   self.mouseClick = function(){
     self.parent().clearSelection();
     self.isSelected(true);
+    self.bounce(1500);
+  }
+
+  self.contentString = "Place: " + self.name;
+
+  self.infoWindow = new google.maps.InfoWindow({
+    content: self.contentString
+  });
+
+  self.bounce = function(duration) {
+    self.marker.setAnimation(google.maps.Animation.BOUNCE);
+
+    window.setTimeout(function(duration) {
+      self.marker.setAnimation(null);      
+    }, duration);
   }
 
   self.marker.addListener('click', function() {
