@@ -7,4 +7,3 @@ gitignore
 .grunt
 
 keys
-src/js/apiKeys.js
