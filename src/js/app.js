@@ -99,9 +99,14 @@ app.Place = function(name, lat, lng, parent) {
   }
 
   self.mouseClick = function(){
-    self.parent().clearSelection();
+    var parent = self.parent();
+    parent.clearSelection();
     self.isSelected(true);
     self.bounce(1500);
+
+    //Make api call
+    console.log("Making YELP API call...");
+    parent.yelpApi.search();
   }
 
   self.contentString = "Place: " + self.name;
@@ -125,6 +130,9 @@ app.Place = function(name, lat, lng, parent) {
   self.isVisible(true);
   self.isHighlighted(false);
 }
+
+
+
 
 app.PlacesViewModel = function() {
   var self = this;
@@ -168,6 +176,10 @@ app.PlacesViewModel = function() {
       place.isSelected(false);
     });
   }
+
+  // yelp.js
+  self.yelpApi = yelpAPI();
+  console.dir(self.yelpApi);
 
   // Dummy init for test
   self.defaultData.forEach(function(data, index, array){
