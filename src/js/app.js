@@ -106,7 +106,7 @@ app.Place = function(name, lat, lng, parent) {
 
     //Make api call
     console.log("Making YELP API call...");
-    parent.yelpApi.search();
+    parent.fetchYelpData();
   }
 
   self.contentString = "Place: " + self.name;
@@ -134,6 +134,7 @@ app.Place = function(name, lat, lng, parent) {
 
 
 
+
 app.PlacesViewModel = function() {
   var self = this;
 
@@ -141,6 +142,17 @@ app.PlacesViewModel = function() {
     { name: "CMU", lat: 37.4107, lng: -122.0593 },
     { name: "Stanford", lat: 38.4107, lng: -123.0593 }
   ];
+
+  // yelp.js
+  self.yelpApi = yelpAPI();
+
+  self.fetchYelpData = function() {
+    var url = self.yelpApi.searchUrlBuilder("Restaurant", "Mountain View, CA", 5);
+    self.yelpApi.search(url, function(data){
+      console.log("Fetch yelp data successful");
+      console.dir(data);
+    });
+  };
 
   self.places = ko.observableArray([]);
 
@@ -177,10 +189,6 @@ app.PlacesViewModel = function() {
     });
   }
 
-  // yelp.js
-  self.yelpApi = yelpAPI();
-  console.dir(self.yelpApi);
-
   // Dummy init for test
   self.defaultData.forEach(function(data, index, array){
     self.addPlace(new app.Place(data.name, data.lat, data.lng, self));
@@ -211,14 +219,3 @@ function initMap(){
   app.mapView.initMap();
   ko.applyBindings(new app.PlacesViewModel());
 }
-
-
-
-
-
-
-
-
-
-
-

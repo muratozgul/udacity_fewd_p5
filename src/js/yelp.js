@@ -15,7 +15,24 @@ function yelpAPI() {
     return result;
   }
 
-  api.search = function(searchParams, callback){
+  api.searchUrlBuilder = function(term, location, limit) {
+    term = term || "Movie Theater";
+    location = location || "Mountain View, CA";
+    limit = limit || 5;
+
+    var url = "https://api.yelp.com/v2/search/?";
+    url += "term=" + term;
+    url += "&location=" + location;
+    url += "&limit=" + limit;
+
+    return url;
+  };
+
+  api.search = function(searchUrl, callback){
+    searchUrl = searchUrl || api.defaultURL;
+
+    console.log(searchUrl);
+
     var accessor = {
       consumerSecret : api.auth.consumerSecret,
       tokenSecret : api.auth.tokenSecret
@@ -29,8 +46,7 @@ function yelpAPI() {
     parameters.push(['oauth_signature_method', api.auth.signatureMethod]);
 
     var message = {
-      //action : 'http://api.yelp.com/v2/business/bay-to-breakers-12k-san-francisco',
-      action: api.defaultURL,
+      action: searchUrl,
       method : 'GET',
       parameters : parameters
     };
@@ -40,7 +56,6 @@ function yelpAPI() {
 
     var parameterMap = OAuth.getParameterMap(message.parameters);
     parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature);
-    console.log(parameterMap);
 
     $.ajax({
       url: message.action,
@@ -49,25 +64,48 @@ function yelpAPI() {
       dataType: 'jsonp',
       jsonpCallback: 'cb',
       success: function(data, textStats, XMLHttpRequest) {
-        console.log(data);
-        $(".js-apiResult").text(JSON.stringify(data));
+        callback(data);
       }
     });
+  };
 
-    // $.ajax({
-    //   type: 'GET',
-    //   url: api.defaultURL,
-    //   async: false,
-    //   jsonpCallback: 'jsonCallback',
-    //   contentType: "application/json",
-    //   dataType: 'jsonp',
-    //   success: function(json) {
-    //     console.dir(json);
-    //   },
-    //   error: function(e) {
-    //     console.log(e.message);
-    //   }
-    // });
+  api.business = function(businessId, callback){
+    var url = "https://api.yelp.com/v2/business/" + businessId;
+
+    var accessor = {
+      consumerSecret : api.auth.consumerSecret,
+      tokenSecret : api.auth.tokenSecret
+    };
+
+    parameters = [];
+    parameters.push(['callback', 'cb']);
+    parameters.push(['oauth_consumer_key', api.auth.consumerKey]);
+    parameters.push(['oauth_consumer_secret', api.auth.consumerSecret]);
+    parameters.push(['oauth_token', api.auth.token]);
+    parameters.push(['oauth_signature_method', api.auth.signatureMethod]);
+
+    var message = {
+      action: url,
+      method : 'GET',
+      parameters : parameters
+    };
+
+    OAuth.setTimestampAndNonce(message);
+    OAuth.SignatureMethod.sign(message, accessor);
+
+    var parameterMap = OAuth.getParameterMap(message.parameters);
+    parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature);
+
+    $.ajax({
+      url: url,
+      data: parameterMap,
+      cache: true,
+      dataType: 'jsonp',
+      jsonpCallback: 'cb',
+      success: function(data, textStats, XMLHttpRequest) {
+        callback(data);
+      }
+    });
 
   };
 
