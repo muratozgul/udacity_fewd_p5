@@ -2,10 +2,19 @@ var app = {
   mapView: {}
 };
 
+app.PlaceFactory = function(data, parent) {
+  var coord = data.location.coordinate;
+  var place = new app.Place(data.name, coord.latitude, coord.longitude, parent);
+  place.yelpData = data;
+  return place;
+};
+
 app.Place = function(name, lat, lng, parent) {
   var self = this;
 
   self.parent = ko.observable(parent);
+
+  self.yelpData = {};
 
   self.name = name;
   self.position = {
@@ -60,6 +69,7 @@ app.Place = function(name, lat, lng, parent) {
     if (currentState) {
       self.showMarker();
     } else {
+      self.infoWindow.close();
       self.hideMarker();
     }
   });
@@ -67,9 +77,12 @@ app.Place = function(name, lat, lng, parent) {
   self.isHighlighted.subscribe(function(currentState) {
     if (self.isSelected()) {
       self.marker.setIcon(self.markerIcons.GREEN);
+      self.$el().removeClass("highlighted");
     } else if (currentState) {
+      self.$el().addClass("highlighted");
       self.marker.setIcon(self.markerIcons.YELLOW);
     } else {
+      self.$el().removeClass("highlighted");
       self.marker.setIcon(self.markerIcons.RED);
     }
   });
@@ -102,7 +115,7 @@ app.Place = function(name, lat, lng, parent) {
     var parent = self.parent();
     parent.clearSelection();
     self.isSelected(true);
-    self.bounce(1500);
+    self.bounce(1400);
 
     //Make api call
     console.log("Making YELP API call...");
@@ -127,6 +140,14 @@ app.Place = function(name, lat, lng, parent) {
     self.mouseClick();
   });
 
+  self.marker.addListener('mouseover', function() {
+    self.mouseOver();
+  });
+
+  self.marker.addListener('mouseout', function() {
+    self.mouseOut();
+  });
+
   self.isVisible(true);
   self.isHighlighted(false);
 }
@@ -146,12 +167,9 @@ app.PlacesViewModel = function() {
   // yelp.js
   self.yelpApi = yelpAPI();
 
-  self.fetchYelpData = function() {
+  self.fetchYelpData = function(callback) {
     var url = self.yelpApi.searchUrlBuilder("Restaurant", "Mountain View, CA", 5);
-    self.yelpApi.search(url, function(data){
-      console.log("Fetch yelp data successful");
-      console.dir(data);
-    });
+    self.yelpApi.search(url, callback);
   };
 
   self.places = ko.observableArray([]);
@@ -190,9 +208,16 @@ app.PlacesViewModel = function() {
   }
 
   // Dummy init for test
-  self.defaultData.forEach(function(data, index, array){
-    self.addPlace(new app.Place(data.name, data.lat, data.lng, self));
+  // self.defaultData.forEach(function(data, index, array){
+  //   self.addPlace(new app.Place(data.name, data.lat, data.lng, self));
+  // });
+
+  self.fetchYelpData(function(data){
+    data.businesses.forEach(function(data, index, array){
+      self.addPlace(new app.PlaceFactory(data, self));
+    });
   });
+  
 }
 
 ko.bindingHandlers.el = {

@@ -8,7 +8,7 @@
   height: 450px;
 }
 
-.placeItem:hover {
+.highlighted {
   background-color: yellow;
 }
 
