@@ -18,6 +18,8 @@ function apiKeys(){
 
 For generating your own keys take a look at [here](https://www.yelp.com/developers/documentation/v2/overview)
 
+Application will not be able to fetch restaurants data to populate the app if these keys are not provided!
+
 ##### Open src/index.html 
 Double click src/index.html to open the application
 
