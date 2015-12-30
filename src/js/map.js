@@ -1,47 +1,68 @@
+/**
+ * Returns an object that contains data and utility methods to manage the map
+ * @returns {Object} - mapView instance
+ */
 function getMapView() {
   var mapView = {};
   
   mapView.map = null;
 
-  mapView.bounds = null;
+  mapView.bounds = new google.maps.LatLngBounds();
 
+  mapView.center = {
+    lat: 37.4107, 
+    lng: -122.0593
+  };
+
+  /**
+   * Calculates the center of the map and stores it
+   */
+  mapView.calculateCenter = function() {
+    mapView.center = mapView.map.getCenter();
+  };
+
+  /**
+   * Initializes the map
+   * Binds event handlers, re-centers the map on window resize
+   */
   mapView.initMap = function() {
     // Create a map object and specify the DOM element for display.
     mapView.map = new google.maps.Map(document.getElementById('map'), {
-      center: {
-        lat: 37.4107, 
-        lng: -122.0593
-      },
+      center: mapView.center,
       scrollwheel: false,
       zoom: 12
     });
 
-    mapView.bounds = new google.maps.LatLngBounds();
+    google.maps.event.addDomListener(mapView.map, 'idle', function() {
+      mapView.calculateCenter();    
+    });
+    
+    google.maps.event.addDomListener(window, 'resize', function() {
+      mapView.map.setCenter(mapView.center);
+    });
   };
 
-  mapView.getMap = function(){
+  /**
+   * Returns map object
+   */
+  mapView.getMap = function() {
     return mapView.map;
   };
 
-  mapView.createMarker = function(data){
-    var lat = data.lat;
-    var lng = data.lng;
-    var name = data.name;
-
-    var marker = new google.maps.Marker({
-      map: mapView.map,
-      position: {
-        lat: lat,
-        lng: lng
-      },
-      title: name
-    });
-
-    // this.bounds.extend(new google.maps.LatLng(lat, lng));
-    // this.map.fitBounds(this.bounds);
-    // this.map.setCenter(this.bounds.getCenter());
+  /**
+   * Adds a coordinate to the map bounds
+   */
+  mapView.extendBounds = function(lat, lng) {
+    mapView.bounds.extend(new google.maps.LatLng(lat, lng));    
   };
+
+  /**
+   * Calculate center from included coordinates
+   */
+  mapView.fitBounds = function() {
+    mapView.map.fitBounds(mapView.bounds);
+    mapView.map.setCenter(mapView.map.getCenter());
+  }
 
   return mapView;
 }
-

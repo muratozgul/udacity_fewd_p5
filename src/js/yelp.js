@@ -1,12 +1,21 @@
+/**
+ * Returns an object that wraps data and helper methods
+ * to interact with Yelp API
+ * @returns {Object} - yelpApi helper object
+ */
 function yelpAPI() {
   var api = {};
 
-  // apiKeys.js
+  // Get keys from apiKeys.js
   api.auth = apiKeys();
   api.auth.signatureMethod = "HMAC-SHA1";
 
-  api.defaultURL = "https://api.yelp.com/v2/search/?term=Movie Theater&location=Mountain View, CA&limit=5";
-
+  /**
+   * Returns a random string
+   * @param {Number} length - Length of the requested random string
+   * @param {string} chars - Pool of characters to generate from
+   * @returns {string} - Random string
+   */
   api.randomString = function randomString(length, chars) {
     var result = '';
     for (var i = length; i > 0; --i) {
@@ -15,6 +24,13 @@ function yelpAPI() {
     return result;
   }
 
+  /**
+   * Returns an url to query yelp API
+   * @param {string} term - Type of places to filter
+   * @param {string} location - Location like: "Mountain View"
+   * @param {Number} limit - Number of results to be returned
+   * @returns {string} - Search url
+   */
   api.searchUrlBuilder = function(term, location, limit) {
     term = term || "Movie Theater";
     location = location || "Mountain View, CA";
@@ -28,10 +44,12 @@ function yelpAPI() {
     return url;
   };
 
+  /**
+   * Sends an AJAX request to Yelp Search API
+   * @param {string} searchUrl - Target url for AJAX request
+   * @callback - On succesful response, called with response data as argument
+   */
   api.search = function(searchUrl, callback){
-    searchUrl = searchUrl || api.defaultURL;
-
-    console.log(searchUrl);
 
     var accessor = {
       consumerSecret : api.auth.consumerSecret,
@@ -47,8 +65,8 @@ function yelpAPI() {
 
     var message = {
       action: searchUrl,
-      method : 'GET',
-      parameters : parameters
+      method: 'GET',
+      parameters: parameters
     };
 
     OAuth.setTimestampAndNonce(message);
@@ -65,10 +83,18 @@ function yelpAPI() {
       jsonpCallback: 'cb',
       success: function(data, textStats, XMLHttpRequest) {
         callback(data);
+      },
+      error: function (request, status, error) {
+        alert("Failed to fetch data from YELP API");
       }
     });
   };
 
+  /**
+   * Sends an AJAX request to Yelp Business API
+   * @param {string} businessId - Yelp business id to request detailed data
+   * @callback - On succesful response, called with response data as argument
+   */
   api.business = function(businessId, callback){
     var url = "https://api.yelp.com/v2/business/" + businessId;
 
@@ -104,6 +130,9 @@ function yelpAPI() {
       jsonpCallback: 'cb',
       success: function(data, textStats, XMLHttpRequest) {
         callback(data);
+      },
+      error: function (request, status, error) {
+        alert("Failed to fetch business data from YELP API");
       }
     });
 

@@ -1,7 +1,7 @@
 {
-  "name": "udacity_fewd_p4",
+  "name": "udacity_fewd_p5",
   "version": "0.0.1",
-  "description": "Udacity Frontend Nanodegree Project 4",
+  "description": "Udacity Frontend Nanodegree Project 5",
   "author": "Murat Ozgul",
   "devDependencies": {
     "grunt": "^0.4.5",
