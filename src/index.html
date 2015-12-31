@@ -40,11 +40,11 @@
         <h3>Places</h3>
         <ul class="list-group">
           <!-- ko if: filteredPlaces().length === 0 -->
-          <li class="list-group-item">No places to display</li>
+          <li class="list-group-item" id="js-notification">No places to display</li>
           <!-- /ko -->
           <!-- ko foreach : filteredPlaces -->
           <li class="list-group-item placeItem" 
-          data-bind="text: name, event: { mouseover: mouseOver, mouseout: mouseOut }, click: mouseClick, el: el, $el: $el"></li>
+          data-bind="text: name, event: { mouseover: mouseOver, mouseout: mouseOut }, click: mouseClick, css: { highlighted: isHighlighted, selected: isSelected }"></li>
           <!-- /ko -->
         </ul>
       </div>

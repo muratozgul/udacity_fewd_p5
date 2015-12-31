@@ -75,6 +75,10 @@ function yelpAPI() {
     var parameterMap = OAuth.getParameterMap(message.parameters);
     parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature);
 
+    var requestTimer = setTimeout(function(){
+      callback(new JsonpTimeoutError("Failed to load data: Server Response Timeout"));
+    }, 8000);
+
     $.ajax({
       url: message.action,
       data: parameterMap,
@@ -82,10 +86,8 @@ function yelpAPI() {
       dataType: 'jsonp',
       jsonpCallback: 'cb',
       success: function(data, textStats, XMLHttpRequest) {
-        callback(data);
-      },
-      error: function (request, status, error) {
-        alert("Failed to fetch data from YELP API");
+        clearTimeout(requestTimer);
+        callback(null, data);
       }
     });
   };
@@ -122,6 +124,10 @@ function yelpAPI() {
     var parameterMap = OAuth.getParameterMap(message.parameters);
     parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature);
 
+    var requestTimer = setTimeout(function(){
+      callback(new JsonpTimeoutError("Failed to load data: Server Response Timeout"));
+    }, 8000);
+    
     $.ajax({
       url: url,
       data: parameterMap,
@@ -129,10 +135,8 @@ function yelpAPI() {
       dataType: 'jsonp',
       jsonpCallback: 'cb',
       success: function(data, textStats, XMLHttpRequest) {
-        callback(data);
-      },
-      error: function (request, status, error) {
-        alert("Failed to fetch business data from YELP API");
+        clearTimeout(requestTimer);
+        callback(null, data);
       }
     });
 
@@ -140,3 +144,10 @@ function yelpAPI() {
 
   return api;
 }
+
+function JsonpTimeoutError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+}
+JsonpTimeoutError.prototype = Object.create(Error.prototype);
+JsonpTimeoutError.prototype.name = "JsonpTimeoutError";

@@ -1,3 +1,5 @@
+"use strict";
+
 var app = {
   mapView: {}
 };
@@ -33,15 +35,11 @@ app.Place = function(name, lat, lng, yelpData, parent) {
   self.name = name;
   self.position = {
     lat: lat,
-    lng: lng 
+    lng: lng
   };
   self.isVisible = ko.observable(false);
   self.isHighlighted = ko.observable(false);
   self.isSelected = ko.observable(false);
-
-  self.el = ko.observable();
-
-  self.$el = ko.observable();
 
   var map = app.mapView.getMap();
 
@@ -72,35 +70,35 @@ app.Place = function(name, lat, lng, yelpData, parent) {
    */
   self.addMarker = function(){
     self.marker.setMap(map);
-  }
+  };
 
   /**
    * Remove place marker from the map
    */
   self.removeMarker = function(){
     self.marker.setMap(null);
-  }
+  };
 
   /**
    * Show place marker in the map
    */
   self.showMarker = function(){
     self.marker.setVisible(true);
-  }
+  };
 
   /**
    * Hide place marker in the map
    */
   self.hideMarker = function(){
     self.marker.setVisible(false);
-  }
+  };
 
   /**
    * Center the map on place marker
    */
   self.centerOnMap = function(){
     map.setCenter(self.marker.getPosition());
-  }
+  };
 
   self.isVisible.subscribe(function(currentState) {
     if (currentState) {
@@ -115,28 +113,23 @@ app.Place = function(name, lat, lng, yelpData, parent) {
 
   self.isHighlighted.subscribe(function(currentState) {
     if (self.isSelected()) {
-      self.$el().removeClass("highlighted");
       self.marker.setIcon(self.markerIcons.GREEN);
       
     } else if (currentState) {
-      self.$el().addClass("highlighted");
       self.marker.setIcon(self.markerIcons.YELLOW);
 
     } else {
-      self.$el().removeClass("highlighted");
       self.marker.setIcon(self.markerIcons.RED);
     }
   });
 
   self.isSelected.subscribe(function(currentState) {
     if (currentState) {
-      self.$el().addClass("selected");
       self.marker.setIcon(self.markerIcons.GREEN);
       self.infoWindow.open(map, self.marker);
       self.parent().selectedPlace(self);
 
     } else {
-      self.$el().removeClass("selected");
       self.infoWindow.close();
 
       if(self.isHighlighted()) {
@@ -152,14 +145,14 @@ app.Place = function(name, lat, lng, yelpData, parent) {
    */
   self.mouseOver = function(){
     self.isHighlighted(true);
-  }
+  };
 
   /**
    * Remove highlight when mouse is out
    */
   self.mouseOut = function(){
     self.isHighlighted(false);
-  }
+  };
 
   /**
    * Select when clicked and animate marker
@@ -169,7 +162,7 @@ app.Place = function(name, lat, lng, yelpData, parent) {
     parent.clearSelection();
     self.isSelected(true);
     self.bounce(1400);    
-  }
+  };
 
   /**
    * Animate marker by bouncing
@@ -181,7 +174,7 @@ app.Place = function(name, lat, lng, yelpData, parent) {
     window.setTimeout(function(duration) {
       self.marker.setAnimation(null);      
     }, duration);
-  }
+  };
 
   self.marker.addListener('click', function() {
     self.mouseClick();
@@ -246,7 +239,8 @@ app.PlacesViewModel = function() {
       ko.utils.arrayForEach(self.places(), function(place) {
         place.isVisible(true);
       });
-      return self.places(); 
+      return self.places();
+
     } else {
       // use regex to find filter string inside place name
       var filter = self.currentFilter();
@@ -268,7 +262,14 @@ app.PlacesViewModel = function() {
     });
   };
 
-  self.fetchYelpData(function(data) {
+  self.fetchYelpData(function(err, data) {
+    // Handle error if any
+    if(err) {
+      console.log(err.message);
+      $("#js-notification").text(err.message);
+      return;
+    }
+
     // Populate places array with place object generated from business data
     data.businesses.forEach(function(data, index, array){
       self.addPlace(new app.PlaceFactory(data, self));
@@ -278,26 +279,6 @@ app.PlacesViewModel = function() {
   });
   
 }
-
-/**
- * Bind the DOM element, so it is easily accesible
- */
-ko.bindingHandlers.el = {
-  init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-    var value = valueAccessor();
-    value(element);
-  }
-};
-
-/**
- * Bind jQuery object of DOM element, so it is easily accesible
- */
-ko.bindingHandlers.$el = {
-  init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-    var value = valueAccessor();
-    value($(element).first());
-  }
-};
 
 /**
  * Start application
